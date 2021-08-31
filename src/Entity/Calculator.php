@@ -15,10 +15,11 @@ class Calculator
         
         $operator = null;
         if(!self::validateExpression($expression) || empty($expression)) 
-            throw new NotFoundHttpException("Invalid expression");
+            throw new \Exception('Invalid Expression');
 
         $arr = self::splitExpression($expression);
         $stack = [];
+        $operatorStack = [];
         for( $i = 0; $i < count($arr); $i++) {
             if(is_numeric($arr[$i])) {
                 if( count($stack) == 1)
@@ -29,18 +30,22 @@ class Calculator
                             $op = new Multiply();
                             $res = $op->runCalculation($elem, $arr[$i]);
                             array_push($stack, $res);
+                            array_pop($operatorStack);
                             break;
                         case '+': 
                             $op = new Add();
                             array_push($stack, $op->runCalculation($elem, $arr[$i]));
+                            array_pop($operatorStack);
                             break; 
                         case '/': 
                             $op = new Divide();
                             array_push($stack, $op->runCalculation($elem, $arr[$i]));
+                            array_pop($operatorStack);
                             break;
                         case '-': 
                             $op = new Subtract();
                             array_push($stack, $op->runCalculation($elem, $arr[$i]));
+                            array_pop($operatorStack);
                             break;                           
                     }
                 } 
@@ -49,6 +54,9 @@ class Calculator
                 }
             } else {
                 $operator = $arr[$i];
+                array_push($operatorStack, $operator);
+                if(count($operatorStack) > 1) 
+                    throw new \Exception('Invalid Expression');
             }
 
         }
